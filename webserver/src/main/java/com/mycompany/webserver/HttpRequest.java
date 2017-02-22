@@ -128,11 +128,24 @@ private void processRequest() throws Exception
     else if (httpMethod.equals("POST")){
         // verwerk POST request
         System.out.println("Robert 11 POST requestline = "+ requestLine );
+        // nu POST request verwerken en iets terugsturen
+        //os.writeBytes(requestLine);
+        Map<String, String> postMap = getPostDataMap(requestLine);
+        //os.writeBytes(postMap.toString());
+        for(Object objname:postMap.keySet()) {
+            System.out.println("Robert 17 "+objname);
+            System.out.println("Robert 18 "+ postMap.get(objname));
+            os.writeBytes("key = "+objname+" ");
+            os.writeBytes("value = "+postMap.get(objname));
+            os.writeBytes("\n");
+        }
+        
     }
     else {
         // Nu een request ongelijk aan GET of POST
         System.out.println("Robert 12 httpMethod = "+ httpMethod);
         System.out.println("Robert 13 requestLine = "+ requestLine);
+        os.writeBytes("This is no GET or POST request");
     }
    
     os.close(); //Close streams and socket.
@@ -154,8 +167,7 @@ throws Exception
       os.write(buffer, 0, bytes);
    }
 }
-private static String contentType(String fileName)
- {
+private static String contentType(String fileName) {
     if(fileName.endsWith(".htm") || fileName.endsWith(".html"))
         return "text/html";
     if(fileName.endsWith(".jpg"))
@@ -163,7 +175,28 @@ private static String contentType(String fileName)
     if(fileName.endsWith(".gif"))
         return "text/gif";
     return "application/octet-stream";
- }
+}
+
+public static Map<String, String> getPostDataMap(String postString) {
+        Map<String, String> postDataMap = new HashMap<String, String>();
+
+        for (String postReq : postString.split("&")) {
+            String[] nameValue = postReq.split("=");
+
+            if (nameValue.length > 1) {
+                postDataMap.put(nameValue[0], nameValue[1]);
+                System.out.println("Robert14 nameValue[0] = "+ nameValue[0]);
+                System.out.println("Robert15 nameValue[1] = "+ nameValue[1]);
+            } else {
+                postDataMap.put(nameValue[0], null);
+                System.out.println("Robert16 nameValue[0] = "+ nameValue[0]);
+            }
+        }
+
+        return postDataMap;
+    }
+
+
     
     
 }
