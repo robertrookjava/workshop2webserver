@@ -180,6 +180,12 @@ private static String contentType(String fileName) {
 public static Map<String, String> getPostDataMap(String postString) {
         Map<String, String> postDataMap = new HashMap<String, String>();
 
+        postString = postString.substring(0, postString.length()-8);
+        String[] parts = postString.split("\\?");
+        String part1 = parts[0]; 
+        String part2 = parts[1];
+        postString = part2;
+        
         for (String postReq : postString.split("&")) {
             String[] nameValue = postReq.split("=");
 
