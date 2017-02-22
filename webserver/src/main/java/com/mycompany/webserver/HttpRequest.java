@@ -36,6 +36,7 @@ public void run()
  
 private void processRequest() throws Exception
 {
+    String httpMethod;
     InputStream is = socket.getInputStream();
     DataOutputStream os = new DataOutputStream(
     socket.getOutputStream());
@@ -48,7 +49,7 @@ private void processRequest() throws Exception
     String requestLine = br.readLine();
    
     System.out.println();  //Echoes request line out to screen
-    System.out.println(requestLine);
+    System.out.println("Robert 9 "+requestLine);
    
    //The following obtains the IP address of the incoming connection.
     InetAddress incomingAddress = socket.getInetAddress();
@@ -56,69 +57,82 @@ private void processRequest() throws Exception
     System.out.println("The incoming address is:   " + ipString);
    //String Tokenizer is used to extract file name from this class.
     StringTokenizer tokens = new StringTokenizer(requestLine);
-    tokens.nextToken();  // skip over the method, which should be “GET”
-    String fileName = tokens.nextToken();
-    // Prepend a “.” so that file request is within the current directory.
-    // Robert even afgevinkt
-    fileName = "." + fileName;
+    
+    httpMethod = tokens.nextToken();  // skip over the method, which should be “GET”
+    if (httpMethod.equals("GET")){
+        System.out.println("Robert 10: httpMethod = "+httpMethod);
+        String fileName = tokens.nextToken();
+        // Prepend a “.” so that file request is within the current directory.
+        // Robert even afgevinkt
+        fileName = "." + fileName;
    
-    String headerLine = null;
-    while ((headerLine = br.readLine()).length() != 0) { //While the header still has text, print it
-        System.out.println(headerLine);
-    }
+        String headerLine = null;
+        while ((headerLine = br.readLine()).length() != 0) { //While the header still has text, print it
+            System.out.println(headerLine);
+        }
    
    
-    // Open the requested file.
-    FileInputStream fis = null;
-    boolean fileExists = true;
-    try {
-    fis = new FileInputStream(fileName);
-    System.out.println("Robert 1 fileName = "+fileName);
-    System.out.println("Robert 2 directory ="+System.getProperty("user.dir"));
-    } 
-    catch (FileNotFoundException e) {
-        fileExists = false;
-        System.out.println("Robert 3 fileName = "+fileName);
-        System.out.println("Robert 4 directory ="+System.getProperty("user.dir"));
+        // Open the requested file.
+        FileInputStream fis = null;
+        boolean fileExists = true;
+        try {
+        fis = new FileInputStream(fileName);
+        System.out.println("Robert 1 fileName = "+fileName);
+        System.out.println("Robert 2 directory ="+System.getProperty("user.dir"));
+        } 
+        catch (FileNotFoundException e) {
+            fileExists = false;
+            System.out.println("Robert 3 fileName = "+fileName);
+            System.out.println("Robert 4 directory ="+System.getProperty("user.dir"));
         
-    }   
+        }   
  
    //Construct the response message
-    String statusLine = null; //Set initial values to null
-    String contentTypeLine = null;
-    String entityBody = null;
-    if (fileExists) {
-        statusLine = "HTTP/1.1 200 OK: ";
-        contentTypeLine = "Content-Type: " +
-        contentType(fileName) + CRLF;
-        System.out.println("Robert 5 fileName = "+fileName);
-        System.out.println("Robert 6 directory ="+System.getProperty("user.dir"));
-    } 
-    else {
-        statusLine = "HTTP/1.1 404 Not Found: ";
-        contentTypeLine = "Content-Type: text/html" + CRLF;
-        entityBody = "<HTML> <HEAD><TITLE>Not Found</TITLE></HEAD> <BODY>Not Found Robert Rook WebServer</BODY></HTML>";
-        System.out.println("Robert 7 fileName = "+fileName);
-        System.out.println("Robert 8 directory ="+System.getProperty("user.dir"));
-    }
+        String statusLine = null; //Set initial values to null
+        String contentTypeLine = null;
+        String entityBody = null;
+        if (fileExists) {
+            statusLine = "HTTP/1.1 200 OK: ";
+            contentTypeLine = "Content-Type: " +
+            contentType(fileName) + CRLF;
+            System.out.println("Robert 5 fileName = "+fileName);
+            System.out.println("Robert 6 directory ="+System.getProperty("user.dir"));
+        } 
+        else {
+            statusLine = "HTTP/1.1 404 Not Found: ";
+            contentTypeLine = "Content-Type: text/html" + CRLF;
+            entityBody = "<HTML> <HEAD><TITLE>Not Found</TITLE></HEAD> <BODY>Not Found Robert Rook WebServer</BODY></HTML>";
+            System.out.println("Robert 7 fileName = "+fileName);
+            System.out.println("Robert 8 directory ="+System.getProperty("user.dir"));
+        }
    //End of response message construction
  
    // Send the status line.
-    os.writeBytes(statusLine);
+        os.writeBytes(statusLine);
  
    // Send the content type line.
-    os.writeBytes(contentTypeLine);
+        os.writeBytes(contentTypeLine);
  
    // Send a blank line to indicate the end of the header lines.
-    os.writeBytes(CRLF);
+        os.writeBytes(CRLF);
    
    // Send the entity body.
-    if (fileExists) {
-    sendBytes(fis, os);
-    fis.close();
-    } 
+        if (fileExists) {
+        sendBytes(fis, os);
+        fis.close();
+        } 
+        else {
+            os.writeBytes(entityBody);
+        }
+    }
+    else if (httpMethod.equals("POST")){
+        // verwerk POST request
+        System.out.println("Robert 11 POST requestline = "+ requestLine );
+    }
     else {
-        os.writeBytes(entityBody);
+        // Nu een request ongelijk aan GET of POST
+        System.out.println("Robert 12 httpMethod = "+ httpMethod);
+        System.out.println("Robert 13 requestLine = "+ requestLine);
     }
    
     os.close(); //Close streams and socket.
